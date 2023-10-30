@@ -1,16 +1,38 @@
-﻿using System.Text;
+﻿using TestTaskProq.Format;
 using TestTaskProq.Handlers;
 
 namespace TestTaskProq;
 
 public class Processor
-{
-    private readonly INumberHandler _handler;
 
-    public Processor(INumberHandler handler)
+{
+    private INumberHandler _handler;
+    private IFormatter _formatter;
+
+    public Processor(INumberHandler handler, IFormatter formatter)
     {
-        ArgumentNullException.ThrowIfNull(handler);
-        _handler = handler;
+        Handler = handler;
+        Formatter = formatter;
+    }
+
+    public INumberHandler Handler
+    {
+        get => _handler;
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value, nameof(Handler));
+            _handler = value;
+        }
+    }
+
+    public IFormatter Formatter
+    {
+        get => _formatter;
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value, nameof(Formatter));
+            _formatter = value;
+        }
     }
 
     public IEnumerable<string> Process(IEnumerable<int> numbers)
@@ -19,12 +41,7 @@ public class Processor
         {
             var number = new Number(x);
             _handler.Handle(number);
-            return FormatResult(number.Substitutions);
+            return _formatter.FormatSubstitutions(number.Substitutions);
         });
-    }
-
-    private static string FormatResult(IEnumerable<string> substitutions)
-    {
-        return string.Join('-', substitutions);
     }
 }
